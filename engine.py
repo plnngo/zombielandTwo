@@ -69,6 +69,17 @@ class Creature:
         if self.index in occupiedFields:
             self.type = 'Zombie'
 
+class Endgame:
+    def __init__(self, cell_number, type):
+        pass
+
+    def evaluate(window):
+        window.flip("black")
+
+
+
+
+
 maxNumZombies = 2
 cell_number = 10
 numZombies = random.randrange(0, maxNumZombies)

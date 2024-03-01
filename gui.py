@@ -2,7 +2,7 @@
 
 import pygame
 import random
-from engine import Creature
+from engine import Creature, Endgame
 
 pygame.init()
 
@@ -11,7 +11,7 @@ CELL_NUMBER = 10
 SQ_SIZE = 50
 FOV_HEIGHT = 3
 FOV_WIDTH = 3
-MAX_NUM_ROUNDS = 10
+MAX_NUM_ROUNDS = 2
 
 WIDTH, HEIGHT = SQ_SIZE * CELL_NUMBER, SQ_SIZE * CELL_NUMBER
 WIN = pygame.display.set_mode((WIDTH + 300, HEIGHT))
@@ -147,7 +147,6 @@ def adjust_fov(x_to_Adjust, y_to_Adjust, isLargeFov):
 allZombies = set()
 maxNumZombies = 5
 numZombies = random.randrange(1, maxNumZombies)
-print(numZombies)
 for i in range(numZombies):
     zombie = Creature(CELL_NUMBER, 'Zombie')
     allZombies.add(zombie)
@@ -156,14 +155,13 @@ for i in range(numZombies):
 allHumans = set()
 maxNumHumans = 5
 numHumans = random.randrange(1, maxNumHumans)
-print(numHumans)
 for i in range(numHumans):
     human = Creature(CELL_NUMBER, 'Human')
     allHumans.add(human)
 
 # execute game
 def main():
-    counter_rounds = 0
+    counter_rounds = 1
     run = True
     pausing = False
     light_off = True
@@ -228,9 +226,10 @@ def main():
                             use_flashlight_small = False
                             loc_fov = []
                             loc_fov_small = []
+                            counter_rounds = counter_rounds + 1
 
-                             # Creatures are moving
-                             # store positional indicies of zombies in a set
+                            # Creatures are moving
+                            # store positional indicies of zombies in a set
                             zombies_indicies = set([])
 
                             # move creatures
@@ -239,8 +238,8 @@ def main():
                                 zombies_indicies.add(zombie.index)
 
                             humans_2_zombies = set()
-                            print("Number zombies: " + str(len(allZombies)))
-                            print("Number humans: " + str(len(allHumans)))
+                            #print("Number zombies: " + str(len(allZombies)))
+                            #print("Number humans: " + str(len(allHumans)))
                             for human in allHumans:
                                 human.move(CELL_NUMBER, 'Human', zombies_indicies)
                                 if human.type == 'Zombie':
@@ -248,8 +247,8 @@ def main():
                                     humans_2_zombies.add(human)
 
                             allHumans.difference_update(humans_2_zombies)
-                            print("Number zombies after collision: " + str(len(allZombies)))
-                            print("Number humans after collision: " + str(len(allHumans)))
+                            #print("Number zombies after collision: " + str(len(allZombies)))
+                            #print("Number humans after collision: " + str(len(allHumans)))
 
                 elif event.button == 3 and light_off == True: # right mouse click
                     use_flashlight = False
@@ -306,8 +305,8 @@ def main():
                         for human in allHumans:
                             if human.get_index(CELL_NUMBER) == fov_index:
                                 num_creatures_in_fov = num_creatures_in_fov + 1
-                print('Number of creatures: ')
-                print(num_creatures_in_fov)
+                #print('Number of creatures: ')
+                #print(num_creatures_in_fov)
                 num = num_creatures_in_fov
             
             if len(loc_fov_small) != 0:
@@ -334,7 +333,12 @@ def main():
             draw_monitor(num, registered_zombies, registered_humans, light_off)
             pygame.display.flip()
             pygame.display.update()
-            
+            print('Number of rounds:')
+            print(counter_rounds)
+
+            if counter_rounds > MAX_NUM_ROUNDS:
+                pygame.display.set_caption("Zombieland - Endgame")
+                Endgame.evaluate(WIN)
 
     pygame.quit()
 
