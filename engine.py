@@ -1,4 +1,5 @@
 import random
+import pygame
 
 class Fov:
     def __init__(self, cell_number, type):
@@ -68,16 +69,6 @@ class Creature:
         # check collision with zombie
         if self.index in occupiedFields:
             self.type = 'Zombie'
-
-class Endgame:
-    def __init__(self, cell_number, type):
-        pass
-
-    def evaluate(window):
-        window.flip("black")
-
-
-
 
 
 maxNumZombies = 2

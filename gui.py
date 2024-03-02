@@ -2,7 +2,7 @@
 
 import pygame
 import random
-from engine import Creature, Endgame
+from engine import Creature
 
 pygame.init()
 
@@ -39,6 +39,63 @@ YELLOW = (250, 250, 0)
 WHITE = (255, 255, 255)
 MONITOR_GREEN = (175, 225, 175)
 
+# Initialise endgame
+def evaluate():
+        set_creature_pos = ''
+        run_evaluate = True
+        make_create_visible = False
+        place_creature = False
+        loc_fov = []
+        while run_evaluate:
+
+            # draw background
+            WIN.fill(GREY)   
+
+            # draw grid
+            draw_grid()
+
+            # print information
+            text = font.render('Click on <Register Zombies> ', True, (255,255,255))
+            text1 = font.render('and mark the position of ', True, (255,255,255))
+            text2 = font.render('all zombies in the grid', True, (255,255,255))
+
+            WIN.blit(text, (530, 50))
+            WIN.blit(text1, (530, 75))
+            WIN.blit(text2, (530, 100))
+
+            # draw registration button
+            button_register_zombie = pygame.Rect(555, 280, 150, 80)
+            text_register_zombie = font.render('Register Zombies!', True, (255,255,255))
+            pygame.draw.rect(WIN, GREEN, button_register_zombie)
+            WIN.blit(text_register_zombie, (560, 300))
+
+            # track user interaction
+            for event in pygame.event.get():
+                # user closes the pygame window
+                if event.type == pygame.QUIT:
+                    run_evaluate = False
+                    return True
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:   # left mouse click
+                        if place_creature:
+                            place_creature = False
+                            make_create_visible = True
+                            
+                        if button_register_zombie.collidepoint(event.pos):
+                            # register all positions of zombies
+                            pygame.mouse.set_cursor(targeting_cursor)
+                            place_creature = True
+            #if make_create_visible:
+            to_draw = draw_fov(make_create_visible)
+            if len(to_draw) == 2:
+                loc_fov = [to_draw[0], to_draw[1]]
+            if len(loc_fov) != 0:
+                adjust_fov(loc_fov[0], loc_fov[1], False)
+            #setCreatures('Zombie')
+            make_create_visible = False
+            pygame.display.update()                
+                            
+                
 # draw grid
 def draw_grid(left = 0, top = 0):
     for i in range(CELL_NUMBER*CELL_NUMBER):
@@ -104,10 +161,7 @@ def draw_monitor(numCreatures, numZombies, numHumans, light_off):
     if not(light_off):
         WIN.blit(text_numDetections, (640, 80))
         WIN.blit(text_numZombies, (585, 160))
-        WIN.blit(text_numHumans, (685, 160))
-
-
-        
+        WIN.blit(text_numHumans, (685, 160))    
 
 def draw_fov(placeFov):
     if placeFov:
@@ -119,7 +173,6 @@ def draw_fov(placeFov):
     else:
         return tuple()
     
-
 def adjust_fov(x_to_Adjust, y_to_Adjust, isLargeFov):
     col = x_to_Adjust // SQ_SIZE
     row = y_to_Adjust // SQ_SIZE
@@ -142,6 +195,19 @@ def adjust_fov(x_to_Adjust, y_to_Adjust, isLargeFov):
         rectangle = pygame.Rect(x, y, FOV_WIDTH*SQ_SIZE, FOV_HEIGHT*SQ_SIZE)
         pygame.draw.rect(WIN, WHITE, rectangle, width=2)
     return (row, col, adjusted_width_fov)
+
+""" def setCreatures(creature):
+    x, y = pygame.mouse.get_pos()
+    col = x // SQ_SIZE
+    row = y // SQ_SIZE
+    x = col  * SQ_SIZE
+    y = row  * SQ_SIZE
+
+    #pygame.draw.circle(WIN, GREEN, [x, y], 10, 10)
+    rectangle = pygame.Rect(x, y, SQ_SIZE, SQ_SIZE)
+    pygame.draw.rect(WIN, GREEN, rectangle)
+    print(creature) """
+
 
 # genrate set of zombies
 allZombies = set()
@@ -189,7 +255,6 @@ def main():
         
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.mouse.set_cursor(default_cursor)
-                #place_fov = False
                 if event.button == 1:   # left mouse click
                     if place_fov:
                         make_fov_visible = True
@@ -238,8 +303,6 @@ def main():
                                 zombies_indicies.add(zombie.index)
 
                             humans_2_zombies = set()
-                            #print("Number zombies: " + str(len(allZombies)))
-                            #print("Number humans: " + str(len(allHumans)))
                             for human in allHumans:
                                 human.move(CELL_NUMBER, 'Human', zombies_indicies)
                                 if human.type == 'Zombie':
@@ -262,10 +325,7 @@ def main():
                 # escape key to close the window
                 if event.key == pygame.K_ESCAPE:
                     run = False
-                
-                # space bar to pause and unpause the run
-                if event.key == pygame.K_SPACE:
-                    pausing = not pausing
+
 
         if not pausing:
 
@@ -338,7 +398,10 @@ def main():
 
             if counter_rounds > MAX_NUM_ROUNDS:
                 pygame.display.set_caption("Zombieland - Endgame")
-                Endgame.evaluate(WIN)
+                quit = evaluate()
+                if quit:
+                    run = False
+                    break
 
     pygame.quit()
 
