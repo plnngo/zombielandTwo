@@ -61,18 +61,30 @@ def draw_evaluation_window():
     pygame.draw.rect(WIN, GREEN, button_register_zombie)
     WIN.blit(text_register_zombie, (515, 250))
 
+    # draw submit button zombies
+    button_submit_zombies = pygame.Rect(695, 230, 70, 80)
+    text_submit = font.render('Submit', True, WHITE)
+    pygame.draw.rect(WIN, GREEN, button_submit_zombies)
+    WIN.blit(text_submit, (700, 250))
+
     # draw registration button humans
     button_register_human = pygame.Rect(510, 330, 150, 80)
     text_register_human = font.render('Register Humans!', True, (0,0,0))
     pygame.draw.rect(WIN, YELLOW, button_register_human)
     WIN.blit(text_register_human, (515, 350))
 
+    # draw submit button humans
+    button_submit_humans = pygame.Rect(695, 330, 70, 80)
+    text_submit = font.render('Submit', True, BLACK)
+    pygame.draw.rect(WIN, YELLOW, button_submit_humans)
+    WIN.blit(text_submit, (700, 350))
+
     # draw clear button
     button_clear = pygame.Rect(615, 430, 75, 40)
     text_clear = font.render('Clear', True, WHITE)
     pygame.draw.rect(WIN, WHITE, button_clear, width=2)
     WIN.blit(text_clear, (630, 435))
-    return button_register_zombie, button_register_human, button_clear
+    return button_register_zombie, button_register_human, button_clear, button_submit_zombies, button_submit_humans
     
 # Initialise endgame
 def evaluate():
@@ -80,12 +92,15 @@ def evaluate():
         pos_estimated_humans = set()
         registering_zombies = False
         registering_humans = False
+        first_creature = False
+        submit_zombies = False
+        submit_humans = False
         run_evaluate = True
         make_creature_visible = False
         place_creature = False
         loc_creature = []
 
-        button_register_zombie, button_register_human, button_clear = draw_evaluation_window()
+        button_register_zombie, button_register_human, button_clear, button_submit_zombies, button_submit_humans = draw_evaluation_window()
         
         while run_evaluate:
             # track user interaction
@@ -97,58 +112,40 @@ def evaluate():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:   # left mouse click
                         if place_creature:
-                            #place_creature = False
                             make_creature_visible = True
                             
                         if button_register_zombie.collidepoint(event.pos):
                             # register all positions of zombies
-                            # draw_evaluation_window()
-                            # pygame.display.flip()
-                            # pygame.display.update()
+                            if registering_humans or submit_zombies:
+                                break
                             pygame.mouse.set_cursor(targeting_cursor)
                             registering_zombies = True
                             registering_humans = False
                             place_creature = True
-                            # if make_creature_visible:
-                                # draw_evaluation_window()
-                                # pygame.display.flip()
-                                # pygame.display.update()
+                            first_creature = True
 
-                                # clear registered zombies but keep humans
-                                # pos_estimated_zombies.clear()
-                                # for index_human in pos_estimated_humans:
-                                #     col = index_human % CELL_NUMBER 
-                                #     row = index_human // CELL_NUMBER
-                                #     adjust_object_on_grid(col * SQ_SIZE, row * SQ_SIZE, False, YELLOW)
-                                # print('num zombies: ', len(pos_estimated_zombies))
-                                # print('num humans: ', len(pos_estimated_humans))
-                                #break
-                        
-                        if button_register_human.collidepoint(event.pos):
+                        elif button_register_human.collidepoint(event.pos):
                             # register all positions of humans
+                            if registering_zombies or submit_humans:
+                                break
                             pygame.mouse.set_cursor(targeting_cursor)
+                            print('num zombies:', len(pos_estimated_zombies))
+                            print('num humans:', len(pos_estimated_humans))
                             registering_zombies = False
                             registering_humans = True
                             place_creature = True
-                            # if make_creature_visible:
-                            #     draw_evaluation_window()
-                            #     pygame.display.flip()
-                            #     pygame.display.update()
+                            first_creature = True
 
-                            #     # clear registered humans but keep zombies
-                            #     pos_estimated_humans.clear()
-                            #     for index_zombie in pos_estimated_zombies:
-                            #         col = index_zombie % CELL_NUMBER 
-                            #         row = index_zombie // CELL_NUMBER
-                            #         adjust_object_on_grid(col * SQ_SIZE, row * SQ_SIZE, False, GREEN)
-                            #     print('num zombies: ', len(pos_estimated_zombies))
-                            #     print('num humans: ', len(pos_estimated_humans))
-                            #     break
+
                         if button_clear.collidepoint(event.pos):
+                            pygame.mouse.set_cursor(default_cursor)
                             pos_estimated_zombies.clear()
                             pos_estimated_humans.clear()
                             registering_zombies = False
                             registering_humans = False
+                            first_creature = False
+                            submit_zombies = False
+                            submit_humans = False
                             run_evaluate = True
                             make_creature_visible = False
                             place_creature = False
@@ -158,23 +155,44 @@ def evaluate():
                             pygame.display.update()
                             print('num zombies: ', len(pos_estimated_zombies))
                             print('num humans: ', len(pos_estimated_humans))
-                    # elif event.button == 3 and place_creature: # right mouse click
-                    #     place_creature = False
-            if registering_zombies:
-                color_frame_creature = GREEN
-            elif registering_humans:
-                color_frame_creature = YELLOW
-            to_draw = draw_object_on_grid(make_creature_visible)
-            if len(to_draw) == 2:
-                loc_creature = (to_draw[0], to_draw[1])
-            if len(loc_creature) != 0:
-                row, col, size = adjust_object_on_grid(loc_creature[0], loc_creature[1], False, color_frame_creature)
-                index_creature = row * CELL_NUMBER + col
-                if registering_zombies:
-                    pos_estimated_zombies.add(index_creature)
-                elif registering_humans:
-                    pos_estimated_humans.add(index_creature)
-                make_creature_visible = False
+
+                        if button_submit_zombies.collidepoint(event.pos):
+                            if registering_humans:
+                                break
+                            pygame.mouse.set_cursor(default_cursor)
+                            submit_zombies = True
+                            place_creature = False
+                            registering_zombies = False
+                        if button_submit_humans.collidepoint(event.pos):
+                            if registering_zombies:
+                                break
+                            pygame.mouse.set_cursor(default_cursor)
+                            submit_humans = True
+                            place_creature = False
+                            registering_humans = False
+                            print('num zombies: ', pos_estimated_zombies)
+                            print('num humans: ', pos_estimated_humans)
+
+                        if first_creature:
+                            first_creature = False
+                        else:    
+                            if registering_zombies:
+                                color_frame_creature = GREEN
+                            elif registering_humans:
+                                color_frame_creature = YELLOW
+                            to_draw = draw_object_on_grid(make_creature_visible)
+                            if len(to_draw) == 2:
+                                loc_creature = (to_draw[0], to_draw[1])
+                            if len(loc_creature) != 0:
+                                row, col, size = adjust_object_on_grid(loc_creature[0], loc_creature[1], False, color_frame_creature)
+                                index_creature = row * CELL_NUMBER + col
+                                if registering_zombies:
+                                    pos_estimated_zombies.add(index_creature)
+                                elif registering_humans:
+                                    pos_estimated_humans.add(index_creature)
+                                make_creature_visible = False
+                        print('num zombies: ', len(pos_estimated_zombies))
+                        print('num humans: ', len(pos_estimated_humans))
             pygame.display.update()                
                             
                 
@@ -277,19 +295,6 @@ def adjust_object_on_grid(x_to_Adjust, y_to_Adjust, isLargeFov, colour):
         rectangle = pygame.Rect(x, y, FOV_WIDTH*SQ_SIZE, FOV_HEIGHT*SQ_SIZE)
         pygame.draw.rect(WIN, colour, rectangle, width=2)
     return (row, col, adjusted_width_fov)
-
-""" def setCreatures(creature):
-    x, y = pygame.mouse.get_pos()
-    col = x // SQ_SIZE
-    row = y // SQ_SIZE
-    x = col  * SQ_SIZE
-    y = row  * SQ_SIZE
-
-    #pygame.draw.circle(WIN, GREEN, [x, y], 10, 10)
-    rectangle = pygame.Rect(x, y, SQ_SIZE, SQ_SIZE)
-    pygame.draw.rect(WIN, GREEN, rectangle)
-    print(creature) """
-
 
 # genrate set of zombies
 allZombies = set()
