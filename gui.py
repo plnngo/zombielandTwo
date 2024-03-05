@@ -2,6 +2,7 @@
 
 import pygame
 import random
+import math 
 from engine import Creature
 
 pygame.init()
@@ -12,6 +13,8 @@ SQ_SIZE = 50
 FOV_HEIGHT = 3
 FOV_WIDTH = 3
 MAX_NUM_ROUNDS = 2
+PENELTY_MISSING = 10
+PENELTY_TOO_MANY = 5
 
 WIDTH, HEIGHT = SQ_SIZE * CELL_NUMBER, SQ_SIZE * CELL_NUMBER
 WIN = pygame.display.set_mode((WIDTH + 300, HEIGHT))
@@ -88,6 +91,11 @@ def draw_evaluation_window():
     
 # Initialise endgame
 def evaluate():
+        # print position of all true zombies
+        print('Index true zombies: ')
+        for zombie in allZombies:
+            print(zombie.index)
+
         pos_estimated_zombies = set()
         pos_estimated_humans = set()
         registering_zombies = False
@@ -193,6 +201,25 @@ def evaluate():
                                 make_creature_visible = False
                         print('num zombies: ', len(pos_estimated_zombies))
                         print('num humans: ', len(pos_estimated_humans))
+
+                        # Compute score
+                        if submit_zombies and submit_humans:
+                            # check zombies first
+                            score_zombie = computeScore(True, pos_estimated_zombies)
+                            # check humans
+                            score_humans = computeScore(False, pos_estimated_humans)
+
+                            score_total = score_zombie + score_humans
+
+                            # Display score
+                            pygame.display.set_caption("Zombieland - Result")
+                            WIN.fill(GREY)  
+                            text_result = font.render('You scored ', True, WHITE)
+                            text_score = font.render(str(score_total), True, WHITE)
+                            WIN.blit(text_result, (250, 200))
+                            WIN.blit(text_score, (400, 200))
+
+
             pygame.display.update()                
                             
                 
@@ -295,6 +322,70 @@ def adjust_object_on_grid(x_to_Adjust, y_to_Adjust, isLargeFov, colour):
         rectangle = pygame.Rect(x, y, FOV_WIDTH*SQ_SIZE, FOV_HEIGHT*SQ_SIZE)
         pygame.draw.rect(WIN, colour, rectangle, width=2)
     return (row, col, adjusted_width_fov)
+
+def computeScore(checkZombies, estimated_indexes_creature):
+    cost = 0
+    if checkZombies:
+        truth = allZombies.copy()
+    else:
+        truth = allHumans.copy()
+    estimated = estimated_indexes_creature.copy()
+
+    if len(estimated_indexes_creature) < len(truth):
+        # registered too less creatures
+        cost = cost - PENELTY_MISSING * abs(len(truth) - len(estimated_indexes_creature))
+
+        for estimated_creature_index in estimated:
+            min_dist = float('inf')
+            closest_creature = -1
+            
+            # retrieve position of registered creature
+            estimated_row = estimated_creature_index // CELL_NUMBER
+            estimated_col = estimated_creature_index % CELL_NUMBER
+            
+            for creature in truth:
+                # Compute distance between true zombie with registered one
+                dist = math.sqrt(math.pow(estimated_row - creature.row, 2) + math.pow(estimated_col - creature.col, 2))
+                if dist<min_dist:
+                    min_dist = dist
+                    closest_creature = creature
+            
+            # re-compute cost
+            cost = cost - min_dist
+
+            # remove registered creature 
+            truth.remove(closest_creature)
+
+        return cost
+        
+    elif len(truth) < len(estimated_indexes_creature):
+        # registered too many creatures
+        cost = cost - PENELTY_TOO_MANY * abs(len(truth) - len(estimated_indexes_creature))
+    
+    # registered correct number 
+    for creature in truth:
+        min_dist = float('inf')
+        closest_creature_index = -1
+        for estimated_creature_index in estimated:
+
+            # retrieve position of registered creature
+            estimated_row = estimated_creature_index // CELL_NUMBER
+            estimated_col = estimated_creature_index % CELL_NUMBER
+
+            # Compute distance between true zombie with registered one
+            dist = math.sqrt(math.pow(estimated_row - creature.row, 2) + math.pow(estimated_col - creature.col, 2))
+            if dist<min_dist:
+                min_dist = dist
+                closest_creature_index = estimated_creature_index
+        
+        # re-compute cost
+        cost = cost - min_dist
+
+        # remove registered creature 
+        estimated.remove(closest_creature_index)
+    
+    return cost
+    
 
 # genrate set of zombies
 allZombies = set()
