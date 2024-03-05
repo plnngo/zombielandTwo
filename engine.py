@@ -1,5 +1,4 @@
 import random
-import pygame
 
 class Fov:
     def __init__(self, cell_number, type):
@@ -16,7 +15,6 @@ class Creature:
         self.index = self.get_index(cell_number)
         self.type = type
         self.directions = ['L', 'D', 'R', 'U', 'S']
-        #print(str(type) + ' Index is ' + str(self.index))
 
     def get_index(self, cell_number):
         return self.row * cell_number + self.col
