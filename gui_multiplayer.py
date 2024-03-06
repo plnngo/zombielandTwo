@@ -40,8 +40,10 @@ flashlight = pygame.image.load('flashlight.png')
 flashlight = pygame.transform.scale(flashlight, (150, 150))
 flashlight_small = pygame.transform.scale(flashlight, (100, 100))
 
+# buttons
 button_flashlight = flashlight.get_rect()
 button_flashlight_small = flashlight_small.get_rect()
+button_light_on_off = pygame.Rect(600, 425, 140, 60)
 
 
 # draw grid
@@ -72,6 +74,16 @@ def draw_humans(human, display_result):
         pygame.draw.rect(WIN, YELLOW, rectangle)
     else:
         pygame.draw.rect(WIN, GREY, rectangle)
+
+def draw_light_button(alreadyPressed):
+    if alreadyPressed:
+        text = font25.render('Light on!', True, WHITE)
+        pygame.draw.rect(WIN, (255, 168, 54), button_light_on_off)
+        WIN.blit(text, (620, 440))
+    else:
+        text = font25.render('Light off!', True, WHITE)
+        pygame.draw.rect(WIN, (136, 128, 123), button_light_on_off)
+        WIN.blit(text, (620, 440))
 
 def number_players_window():
     run = True
@@ -184,7 +196,72 @@ def select_flashlight_window(num_players):
 
     pygame.quit()
         
+def main_game(flashlights):
+    counter_rounds = 1
+    run = True
+    pausing = False
+    light_off = True
+    use_flashlight = list()
+    place_fov = False
+    make_fov_visible = False
+    place_fov_small = False
+    make_fov_visible_small = False
+    loc_fov = []
+    loc_fov_small = []
+    num = 0
+    registered_zombies = 0
+    registered_humans = 0
+    button_flashlights = list()
+    use_flashlight = list()
+    for i in range(len(flashlights)):
+        use_flashlight.append(False)
 
+    while run:
+   
+        # track user interaction
+        for event in pygame.event.get():
+
+            # user closes the pygame window
+            if event.type == pygame.QUIT:
+                run = False
+                
+            # draw background
+            WIN.fill(GREY)   
+        
+            # draw grid
+            draw_grid()
+
+            draw_light_button(light_off)
+
+            # draw flashlight
+            for player in range(len(flashlights)):
+                if player+1 < 3:
+                    y_coord = 150
+                else:
+                    y_coord = 280
+                if flashlights[player-1] == 'Large':
+                    button = flashlight.get_rect()
+                    button_flashlights.append(button)
+                    button.x = 500 + (player%2) * 150
+                    button.y = y_coord
+                    WIN.blit(flashlight, button)
+                elif flashlights[player-1] == 'Small':
+                    button = flashlight_small.get_rect()
+                    button_flashlights.append(button)
+                    button.x = 500 + (player%2) * 150
+                    button.y = y_coord
+                    WIN.blit(flashlight_small, button)
+                    
+                # if player < len(players_flashlights):
+                #     selection = font25.render('Player ' + str(player+1) + ': ' + players_flashlights[player-1], True, WHITE)
+                # else:
+                #     selection = font25.render('Player ' + str(player+1) + ': ', True, WHITE)
+                # WIN.blit(selection, (550, 200 + player*50))
+
+            pygame.display.flip()
+            pygame.display.update()
+
+    pygame.quit()
 
 # execute game
 def main():
@@ -199,7 +276,7 @@ def main():
     flashlights = select_flashlight_window(num_players)
 
     # main game
-    #main_game()
+    main_game(flashlights)
 
 
 if __name__ == "__main__":
