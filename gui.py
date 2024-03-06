@@ -95,8 +95,6 @@ def draw_evaluation_window():
 
 def display_result(score_total, registered_zombies, registered_humans):
 
-    # run_display_result = True
-    # while True:
     # draw background
     WIN.fill(GREY)   
 
@@ -167,7 +165,6 @@ def evaluate():
         clear_disabled = False
         button_replay = pygame.Rect(0, 0, 0, 0)
         button_play_again = pygame.Rect(615, 430, 75, 40)
-        pressed_play_again = False
 
         button_register_zombie, button_register_human, button_clear, button_submit_zombies, button_submit_humans = draw_evaluation_window()
         
@@ -284,9 +281,6 @@ def evaluate():
                             # Display score
                             pygame.display.set_caption("Zombieland - Result")
                             button_replay, button_play_again = display_result(score_total, registered_zombies, registered_humans)
-
-                        
-
 
             pygame.display.update()                
                             
@@ -560,8 +554,6 @@ def main():
                                     humans_2_zombies.add(human)
 
                             allHumans.difference_update(humans_2_zombies)
-                            #print("Number zombies after collision: " + str(len(allZombies)))
-                            #print("Number humans after collision: " + str(len(allHumans)))
 
                 elif event.button == 3 and light_off == True: # right mouse click
                     use_flashlight = False
@@ -653,6 +645,8 @@ def main():
                     run = False
                     break
                 else:
+
+                    # reset and play new round
                     pygame.display.set_caption("Zombieland")
                     counter_rounds = 1
                     run = True
@@ -669,6 +663,26 @@ def main():
                     num = 0
                     registered_zombies = 0
                     registered_humans = 0
+
+                    # genrate new set of zombies
+                    allZombies.clear()
+                    maxNumZombies = 5
+                    numZombies = random.randrange(1, maxNumZombies)
+                    for i in range(numZombies):
+                        row = random.randrange(0, CELL_NUMBER)
+                        col = random.randrange(0, CELL_NUMBER)
+                        zombie = Creature(CELL_NUMBER, row, col, 'Zombie')
+                        allZombies.add(zombie)
+
+                    # generate new set of humans
+                    allHumans.clear()
+                    maxNumHumans = 5
+                    numHumans = random.randrange(1, maxNumHumans)
+                    for i in range(numHumans):
+                        row = random.randrange(0, CELL_NUMBER)
+                        col = random.randrange(0, CELL_NUMBER)
+                        human = Creature(CELL_NUMBER, row, col, 'Human')
+                        allHumans.add(human)
 
     pygame.quit()
 
