@@ -31,6 +31,19 @@ YELLOW = (250, 250, 0)
 WHITE = (255, 255, 255)
 MONITOR_GREEN = (175, 225, 175)
 
+# fonts
+font40 = pygame.font.SysFont('agencyfb', 40, bold=True)
+font25 = pygame.font.SysFont('agencyfb', 25, bold=True)
+
+# flashlights
+flashlight = pygame.image.load('flashlight.png')
+flashlight = pygame.transform.scale(flashlight, (150, 150))
+flashlight_small = pygame.transform.scale(flashlight, (100, 100))
+
+button_flashlight = flashlight.get_rect()
+button_flashlight_small = flashlight_small.get_rect()
+
+
 # draw grid
 def draw_grid(left = 0, top = 0):
     for i in range(CELL_NUMBER*CELL_NUMBER):
@@ -59,3 +72,135 @@ def draw_humans(human, display_result):
         pygame.draw.rect(WIN, YELLOW, rectangle)
     else:
         pygame.draw.rect(WIN, GREY, rectangle)
+
+def number_players_window():
+    run = True
+    
+    while run:
+
+        # track user interaction
+        for event in pygame.event.get():
+
+            # user closes the pygame window
+            if event.type == pygame.QUIT:
+                run = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:   # left mouse click
+                    if button_one_player.collidepoint(event.pos):
+                        print('1')
+                        return 1
+                    elif button_two_player.collidepoint(event.pos):
+                        print('2')
+                        return 2
+                    elif button_three_player.collidepoint(event.pos):
+                        print('3')
+                        return 3
+                    elif button_four_player.collidepoint(event.pos):
+                        print('4')
+                        return 4
+
+            # draw window
+            WIN.fill(GREY) 
+            text = font40.render('How many players? ', True, WHITE)
+            WIN.blit(text, (270, 100))
+
+            # draw player options
+            button_one_player = pygame.Rect(250, 250, 50, 50)
+            text__one = font40.render('1', True, BLACK)
+            pygame.draw.rect(WIN, WHITE, button_one_player)
+            WIN.blit(text__one, (270, 250))
+
+            button_two_player = pygame.Rect(350, 250, 50, 50)
+            text__two = font40.render('2', True, BLACK)
+            pygame.draw.rect(WIN, WHITE, button_two_player)
+            WIN.blit(text__two, (370, 250))
+
+            button_three_player = pygame.Rect(450, 250, 50, 50)
+            text__three = font40.render('3', True, BLACK)
+            pygame.draw.rect(WIN, WHITE, button_three_player)
+            WIN.blit(text__three, (470, 250))
+
+            button_four_player = pygame.Rect(550, 250, 50, 50)
+            text__four = font40.render('4', True, BLACK)
+            pygame.draw.rect(WIN, WHITE, button_four_player)
+            WIN.blit(text__four, (570, 250))
+
+            pygame.display.flip()
+            pygame.display.update()  
+
+    pygame.quit()
+
+def select_flashlight_window(num_players):
+
+    run = True
+    players_flashlights = list()
+    player_counter = 1
+    while run:
+
+        # track user interaction
+        for event in pygame.event.get():
+
+            # user closes the pygame window
+            if event.type == pygame.QUIT:
+                run = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:   # left mouse click
+                    if button_flashlight.collidepoint(event.pos):
+                        players_flashlights.append('Large')
+                        
+                    elif button_flashlight_small.collidepoint(event.pos):
+                        players_flashlights.append('Small')
+
+                    player_counter = player_counter + 1
+            # draw window
+            WIN.fill(GREY) 
+            text = font40.render('Select your flashlight ', True, WHITE)
+            WIN.blit(text, (270, 100))
+
+            # draw flashlights
+            button_flashlight.x = 200
+            button_flashlight.y = 200
+            WIN.blit(flashlight, button_flashlight)
+
+            button_flashlight_small.x = 380
+            button_flashlight_small.y = 220
+            WIN.blit(flashlight_small, button_flashlight_small)
+
+            # print output
+            for player in range(num_players):
+                if player < len(players_flashlights):
+                    selection = font25.render('Player ' + str(player+1) + ': ' + players_flashlights[player-1], True, WHITE)
+                else:
+                    selection = font25.render('Player ' + str(player+1) + ': ', True, WHITE)
+                WIN.blit(selection, (550, 200 + player*50))
+
+            pygame.display.flip()
+            pygame.display.update()  
+
+            if player_counter > num_players:
+                return players_flashlights
+
+    pygame.quit()
+        
+
+
+# execute game
+def main():
+    counter_rounds = 1
+    pygame.mouse.set_cursor(default_cursor)
+
+    # select number of players
+    num_players = number_players_window()
+
+    # select type of flashlight
+    flashlights = list()
+    flashlights = select_flashlight_window(num_players)
+
+    # main game
+    #main_game()
+
+
+if __name__ == "__main__":
+    main()                
