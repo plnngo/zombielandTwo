@@ -103,8 +103,6 @@ def display_result(score_total, registered_zombies, registered_humans):
     # draw grid
     draw_grid()
 
-    print('Test')
-
     # draw true position of zombies and humans
     for zombie in allZombies:
         draw_zombies(zombie)
@@ -124,7 +122,7 @@ def display_result(score_total, registered_zombies, registered_humans):
     WIN.blit(text_score, (700, 170))
 
     # draw play again button
-    button_play_again = pygame.Rect(615, 430, 75, 40)
+    button_play_again = pygame.Rect(550, 280, 170, 170)
     text__play_again = font.render('Play again', True, BLACK)
     pygame.draw.rect(WIN, GREY, button_play_again)
     WIN.blit(text__play_again, (610, 425))
@@ -133,7 +131,7 @@ def display_result(score_total, registered_zombies, registered_humans):
     button_replay.y = 270
     WIN.blit(replay, button_replay)
 
-    return button_replay
+    return button_replay, button_play_again
 
     # track user interaction
     # while True:
@@ -168,6 +166,7 @@ def evaluate():
         loc_creature = []
         clear_disabled = False
         button_replay = pygame.Rect(0, 0, 0, 0)
+        button_play_again = pygame.Rect(615, 430, 75, 40)
         pressed_play_again = False
 
         button_register_zombie, button_register_human, button_clear, button_submit_zombies, button_submit_humans = draw_evaluation_window()
@@ -181,8 +180,7 @@ def evaluate():
                     return False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:   # left mouse click
-                        if pressed_play_again:
-                            print('Play again')
+                        if button_replay.collidepoint(event.pos) or button_play_again.collidepoint(event.pos):
                             return True
                             
                         if place_creature:
@@ -285,10 +283,9 @@ def evaluate():
 
                             # Display score
                             pygame.display.set_caption("Zombieland - Result")
-                            button_replay = display_result(score_total, registered_zombies, registered_humans)
+                            button_replay, button_play_again = display_result(score_total, registered_zombies, registered_humans)
 
-                        if button_replay.collidepoint(event.pos):
-                            pressed_play_again = True
+                        
 
 
             pygame.display.update()                
