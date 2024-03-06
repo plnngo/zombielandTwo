@@ -12,7 +12,7 @@ CELL_NUMBER = 10
 SQ_SIZE = 50
 FOV_HEIGHT = 3
 FOV_WIDTH = 3
-MAX_NUM_ROUNDS = 2
+MAX_NUM_ROUNDS = 10
 PENELTY_MISSING = 10
 PENELTY_TOO_MANY = 5
 PIXEL_OFFSET = 20
@@ -87,9 +87,9 @@ def draw_evaluation_window():
     WIN.blit(text_submit, (700, 350))
 
     # draw clear button
-    button_clear = pygame.Rect(615, 430, 75, 40)
-    text_clear = font.render('Clear', True, WHITE)
-    pygame.draw.rect(WIN, WHITE, button_clear, width=2)
+    button_clear = pygame.Rect(610, 430, 100, 40)
+    text_clear = font.render('Clear', True, BLACK)
+    pygame.draw.rect(WIN, WHITE, button_clear)
     WIN.blit(text_clear, (630, 435))
     return button_register_zombie, button_register_human, button_clear, button_submit_zombies, button_submit_humans
 
@@ -163,12 +163,24 @@ def evaluate():
         place_creature = False
         loc_creature = []
         clear_disabled = False
+        play_again_disabled = True
         button_replay = pygame.Rect(0, 0, 0, 0)
         button_play_again = pygame.Rect(615, 430, 75, 40)
 
         button_register_zombie, button_register_human, button_clear, button_submit_zombies, button_submit_humans = draw_evaluation_window()
         
         while run_evaluate:
+            caption = pygame.display.get_caption()
+            if caption[0] == "Zombieland - Result":
+                play_again_disabled = False
+            else:
+                play_again_disabled = True
+
+            if caption[0] == "Zombieland - Endgame":
+                clear_disabled = False
+            else:
+                clear_disabled = True
+
             # track user interaction
             for event in pygame.event.get():
                 # user closes the pygame window
@@ -177,7 +189,14 @@ def evaluate():
                     return False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:   # left mouse click
+                        # print('clear disabled', clear_disabled)
+                        # print('play again disabled', play_again_disabled)
                         if button_replay.collidepoint(event.pos) or button_play_again.collidepoint(event.pos):
+                            if play_again_disabled:
+                                break
+                            
+                            # # clear_disabled = False
+                            # play_again_disabled = True
                             return True
                             
                         if place_creature:
@@ -205,8 +224,9 @@ def evaluate():
                             place_creature = True
                             first_creature = True
 
-
                         if button_clear.collidepoint(event.pos):
+                            print('Clear disabled')
+                            print(clear_disabled)
                             if clear_disabled:
                                 break
                             pygame.mouse.set_cursor(default_cursor)
@@ -257,12 +277,9 @@ def evaluate():
                                 loc_creature = (to_draw[0], to_draw[1])
                             if len(loc_creature) != 0:
                                 row, col, size = adjust_object_on_grid(loc_creature[0], loc_creature[1], False, color_frame_creature)
-                                # index_creature = row * CELL_NUMBER + col
                                 if registering_zombies:
-                                    # pos_estimated_zombies.add(index_creature)
                                     registered_zombies.add(Creature(CELL_NUMBER, row, col, 'Zombie'))
                                 elif registering_humans:
-                                    # pos_estimated_humans.add(index_creature)
                                     registered_humans.add(Creature(CELL_NUMBER, row, col, 'Human'))
                                 make_creature_visible = False
                         print('num zombies: ', len(registered_zombies))
@@ -529,31 +546,30 @@ def main():
                         place_fov = False
                         place_fov_small = False
                         if button_light_on_off.collidepoint(event.pos):
-                            #draw_monitor(num)
                             light_off = True
                             use_flashlight = False  # flashlight can only be used when light is off
                             use_flashlight_small = False
                             loc_fov = []
                             loc_fov_small = []
                             counter_rounds = counter_rounds + 1
+                            if counter_rounds < MAX_NUM_ROUNDS:
+                                # Creatures are moving
+                                # store positional indicies of zombies in a set
+                                zombies_indicies = set([])
 
-                            # Creatures are moving
-                            # store positional indicies of zombies in a set
-                            zombies_indicies = set([])
+                                # move creatures
+                                for zombie in allZombies:
+                                    zombie.move(CELL_NUMBER, 'Zombie')
+                                    zombies_indicies.add(zombie.index)
 
-                            # move creatures
-                            for zombie in allZombies:
-                                zombie.move(CELL_NUMBER, 'Zombie')
-                                zombies_indicies.add(zombie.index)
+                                humans_2_zombies = set()
+                                for human in allHumans:
+                                    human.move(CELL_NUMBER, 'Human', zombies_indicies)
+                                    if human.type == 'Zombie':
+                                        allZombies.add(human)
+                                        humans_2_zombies.add(human)
 
-                            humans_2_zombies = set()
-                            for human in allHumans:
-                                human.move(CELL_NUMBER, 'Human', zombies_indicies)
-                                if human.type == 'Zombie':
-                                    allZombies.add(human)
-                                    humans_2_zombies.add(human)
-
-                            allHumans.difference_update(humans_2_zombies)
+                                allHumans.difference_update(humans_2_zombies)
 
                 elif event.button == 3 and light_off == True: # right mouse click
                     use_flashlight = False
@@ -607,8 +623,6 @@ def main():
                         for human in allHumans:
                             if human.get_index(CELL_NUMBER) == fov_index:
                                 num_creatures_in_fov = num_creatures_in_fov + 1
-                #print('Number of creatures: ')
-                #print(num_creatures_in_fov)
                 num = num_creatures_in_fov
             
             if len(loc_fov_small) != 0:
