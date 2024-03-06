@@ -9,9 +9,11 @@ class Fov:
 
 class Creature:
 
-    def __init__(self, cell_number, type):
-        self.row = random.randrange(0, cell_number)
-        self.col = random.randrange(0, cell_number)
+    def __init__(self, cell_number, row, col, type):
+        # self.row = random.randrange(0, cell_number)
+        # self.col = random.randrange(0, cell_number)
+        self.row = row
+        self.col = col
         self.index = self.get_index(cell_number)
         self.type = type
         self.directions = ['L', 'D', 'R', 'U', 'S']
@@ -69,17 +71,17 @@ class Creature:
             self.type = 'Zombie'
 
 
-maxNumZombies = 2
-cell_number = 10
-numZombies = random.randrange(0, maxNumZombies)
-for i in range(numZombies):
-    zombie = Creature(cell_number, 'Zombie')
-    print(zombie.row)
-    print(zombie.col)
-    print(zombie.index)
+# maxNumZombies = 2
+# cell_number = 10
+# numZombies = random.randrange(0, maxNumZombies)
+# for i in range(numZombies):
+#     zombie = Creature(cell_number, 'Zombie')
+#     print(zombie.row)
+#     print(zombie.col)
+#     print(zombie.index)
 
-    print("After move:")
-    zombie.move(cell_number, 'Zombie')
-    print(zombie.row)
-    print(zombie.col)
-    print(zombie.index)
+#     print("After move:")
+#     zombie.move(cell_number, 'Zombie')
+#     print(zombie.row)
+#     print(zombie.col)
+#     print(zombie.index)
