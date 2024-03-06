@@ -103,9 +103,9 @@ def display_result(score_total, registered_zombies, registered_humans):
 
     # draw true position of zombies and humans
     for zombie in allZombies:
-        draw_zombies(zombie)
+        draw_zombies(zombie, True)
     for human in allHumans:
-        draw_humans(human)
+        draw_humans(human, True)
 
     # draw registered position of zombies and humans
     for zombie in registered_zombies:
@@ -312,17 +312,23 @@ def draw_grid(left = 0, top = 0):
     return
 
 # draw zombies onto position grids
-def draw_zombies(zombie):
+def draw_zombies(zombie, display_result):
     x = zombie.col * SQ_SIZE + (PIXEL_OFFSET/2)
     y = zombie.row * SQ_SIZE + (PIXEL_OFFSET/2)
     rectangle = pygame.Rect(x, y, SQ_SIZE-PIXEL_OFFSET, SQ_SIZE-PIXEL_OFFSET)
-    pygame.draw.rect(WIN, GREEN, rectangle)
+    if display_result:
+        pygame.draw.rect(WIN, GREEN, rectangle)
+    else:
+        pygame.draw.rect(WIN, GREY, rectangle)
 
-def draw_humans(human):
+def draw_humans(human, display_result):
     x = human.col * SQ_SIZE + (PIXEL_OFFSET/2)
     y = human.row * SQ_SIZE + (PIXEL_OFFSET/2)
     rectangle = pygame.Rect(x, y, SQ_SIZE-PIXEL_OFFSET, SQ_SIZE-PIXEL_OFFSET)
-    pygame.draw.rect(WIN, YELLOW, rectangle)
+    if display_result:
+        pygame.draw.rect(WIN, YELLOW, rectangle)
+    else:
+        pygame.draw.rect(WIN, GREY, rectangle)
 
 def draw_light_button(alreadyPressed):
     if alreadyPressed:
@@ -641,16 +647,14 @@ def main():
 
             # draw zombies
             for zombie in allZombies:
-                draw_zombies(zombie)
+                draw_zombies(zombie, False)
 
             for human in allHumans:
-                draw_humans(human)
+                draw_humans(human, False)
         
             draw_monitor(num, registered_zombies, registered_humans, light_off)
             pygame.display.flip()
             pygame.display.update()
-            # print('Number of rounds:')
-            # print(counter_rounds)
 
             if counter_rounds > MAX_NUM_ROUNDS:
                 pygame.display.set_caption("Zombieland - Endgame")
