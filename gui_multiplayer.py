@@ -133,16 +133,12 @@ def number_players_window():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:   # left mouse click
                     if button_one_player.collidepoint(event.pos):
-                        print('1')
                         return 1
                     elif button_two_player.collidepoint(event.pos):
-                        print('2')
                         return 2
                     elif button_three_player.collidepoint(event.pos):
-                        print('3')
                         return 3
                     elif button_four_player.collidepoint(event.pos):
-                        print('4')
                         return 4
 
             # draw window
@@ -241,7 +237,7 @@ def main_game(flashlights):
     make_fov_visible_small = False
     loc_fov = []
     loc_fov_small = []
-    num = 0
+    num_creatures_in_fov = 0
     registered_zombies = 0
     registered_humans = 0
     button_flashlights = list()
@@ -263,34 +259,6 @@ def main_game(flashlights):
         
             # draw grid
             draw_grid()
-
-            # # place Fov of flashlight
-            # to_draw = draw_object_on_grid(make_fov_visible)
-            # to_draw_small = draw_object_on_grid(make_fov_visible_small)
-
-            # if len(to_draw) == 2:
-            #     loc_fov = [to_draw[0], to_draw[1]]
-            
-            # if len(to_draw_small) == 2:
-            #     loc_fov_small = [to_draw_small[0], to_draw_small[1]]
-
-            # if len(loc_fov) != 0:
-            #     row, col, adjusted_width_fov = adjust_object_on_grid(loc_fov[0], loc_fov[1], True, WHITE) # for large flashlight
-            #     if not(cleared):
-            #         num_creat.add((row, col, adjusted_width_fov))
-            #     print(len(num_creat))
-
-            #     # count how many creatures in large FOV
-            #     num_creatures_in_fov = 0
-            #     for r in range(FOV_HEIGHT):
-            #         for c in range(adjusted_width_fov):
-            #             fov_index = (row+r) * CELL_NUMBER + (col+c)
-            #             for zombie in allZombies:
-            #                 if zombie.get_index(CELL_NUMBER) == fov_index:
-            #                     num_creatures_in_fov = num_creatures_in_fov + 1
-            #             for human in allHumans:
-            #                 if human.get_index(CELL_NUMBER) == fov_index:
-            #                     num_creatures_in_fov = num_creatures_in_fov + 1
 
             # draw flashlight
             for player in range(len(flashlights)):
@@ -331,7 +299,30 @@ def main_game(flashlights):
                         #place_fov_small = False
                         break
 
-                    if light_off:
+                    if light_off:       # button shows light on
+                        # Count how many creatures in large FOV
+                        num_creatures_in_fov = 0
+                        for fov in num_creat:
+                            num_one_fov = 0
+                            row = fov[0]
+                            col = fov[1]
+                            adjusted_width_fov = fov[2]
+                            adjust_object_on_grid(col * SQ_SIZE, row * SQ_SIZE, True, WHITE)
+
+                            for r in range(FOV_HEIGHT):
+                                for c in range(adjusted_width_fov):
+                                    fov_index = (row+r) * CELL_NUMBER + (col+c)
+                                    for zombie in allZombies:
+                                        if zombie.get_index(CELL_NUMBER) == fov_index:
+                                            num_one_fov = num_one_fov + 1
+                                    for human in allHumans:
+                                        if human.get_index(CELL_NUMBER) == fov_index:
+                                            num_one_fov = num_one_fov + 1
+                            print('Number single FOV', num_one_fov)
+                            num_creatures_in_fov = num_creatures_in_fov + num_one_fov
+                        print('Number all FOVs', num_creatures_in_fov)
+                        
+
                         if button_light_on_off.collidepoint(event.pos):
                             light_off = False
                             place_fov = False
@@ -346,7 +337,8 @@ def main_game(flashlights):
                                 pygame.mouse.set_cursor(targeting_cursor)
                                 place_fov = True
                                 break
-                    else:
+                    else:       # light is actually on and button shows light off
+                        num_creatures_in_fov = 0
                         place_fov = False
                         place_fov_small = False
                         if button_light_on_off.collidepoint(event.pos):
@@ -374,8 +366,10 @@ def main_game(flashlights):
 
                                 allHumans.difference_update(humans_2_zombies)
 
+                                
                 elif event.button == 3 and light_off == True: # right mouse click
                     num_creat.clear()
+                    num_creatures_in_fov = 0
                     cleared = True
                     use_flashlight = list()
                     for i in range(len(flashlights)):
@@ -397,19 +391,19 @@ def main_game(flashlights):
                 row, col, adjusted_width_fov = adjust_object_on_grid(loc_fov[0], loc_fov[1], True, WHITE) # for large flashlight
                 if not(cleared):
                     num_creat.add((row, col, adjusted_width_fov))
-                print(len(num_creat))
+                
 
-                # count how many creatures in large FOV
-                num_creatures_in_fov = 0
-                for r in range(FOV_HEIGHT):
-                    for c in range(adjusted_width_fov):
-                        fov_index = (row+r) * CELL_NUMBER + (col+c)
-                        for zombie in allZombies:
-                            if zombie.get_index(CELL_NUMBER) == fov_index:
-                                num_creatures_in_fov = num_creatures_in_fov + 1
-                        for human in allHumans:
-                            if human.get_index(CELL_NUMBER) == fov_index:
-                                num_creatures_in_fov = num_creatures_in_fov + 1
+                # # count how many creatures in large FOV
+                # num_creatures_in_fov = 0
+                # for r in range(FOV_HEIGHT):
+                #     for c in range(adjusted_width_fov):
+                #         fov_index = (row+r) * CELL_NUMBER + (col+c)
+                #         for zombie in allZombies:
+                #             if zombie.get_index(CELL_NUMBER) == fov_index:
+                #                 num_creatures_in_fov = num_creatures_in_fov + 1
+                #         for human in allHumans:
+                #             if human.get_index(CELL_NUMBER) == fov_index:
+                #                 num_creatures_in_fov = num_creatures_in_fov + 1
                 #num = num_creatures_in_fov
             make_fov_visible = False 
             make_fov_visible_small = False
