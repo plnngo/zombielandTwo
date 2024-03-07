@@ -12,7 +12,7 @@ CELL_NUMBER = 10
 SQ_SIZE = 50
 FOV_HEIGHT = 3
 FOV_WIDTH = 3
-MAX_NUM_ROUNDS = 10
+MAX_NUM_ROUNDS = 2
 PENELTY_MISSING = 10
 PENELTY_TOO_MANY = 5
 PIXEL_OFFSET = 20
@@ -225,8 +225,6 @@ def evaluate():
                             first_creature = True
 
                         if button_clear.collidepoint(event.pos):
-                            print('Clear disabled')
-                            print(clear_disabled)
                             if clear_disabled:
                                 break
                             pygame.mouse.set_cursor(default_cursor)
@@ -543,7 +541,6 @@ def main():
                             pygame.mouse.set_cursor(targeting_cursor)
                             place_fov = True
 
-                        
                         if button_flashlight_small.collidepoint(event.pos):
                             use_flashlight_small = True   # flashlight currently in use
                             pygame.mouse.set_cursor(targeting_cursor)

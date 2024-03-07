@@ -85,6 +85,39 @@ def draw_light_button(alreadyPressed):
         pygame.draw.rect(WIN, (136, 128, 123), button_light_on_off)
         WIN.blit(text, (620, 440))
 
+def draw_object_on_grid(placeFov):
+    if placeFov:
+        x, y = pygame.mouse.get_pos()
+        if x<SQ_SIZE*CELL_NUMBER:
+            return (x, y)
+        else:
+            return tuple()
+    else:
+        return tuple()
+    
+def adjust_object_on_grid(x_to_Adjust, y_to_Adjust, isLargeFov, colour):
+    col = x_to_Adjust // SQ_SIZE
+    row = y_to_Adjust // SQ_SIZE
+    x = col  * SQ_SIZE
+    y = row  * SQ_SIZE
+
+    # check if FOV is at right boundary of the grid
+    if not(isLargeFov):
+        fov_size = 1
+        rectangle = pygame.Rect(x, y, fov_size*SQ_SIZE, fov_size*SQ_SIZE)
+        pygame.draw.rect(WIN, colour, rectangle, width=2)
+        return (row, col, fov_size) # for small FOV use size of one
+    
+    adjusted_width_fov = CELL_NUMBER-col
+    if adjusted_width_fov<FOV_WIDTH:
+        rectangle = pygame.Rect(x, y, adjusted_width_fov*SQ_SIZE, FOV_HEIGHT*SQ_SIZE)
+        pygame.draw.rect(WIN, colour, rectangle, width=2)
+    else:
+        adjusted_width_fov = FOV_WIDTH
+        rectangle = pygame.Rect(x, y, FOV_WIDTH*SQ_SIZE, FOV_HEIGHT*SQ_SIZE)
+        pygame.draw.rect(WIN, colour, rectangle, width=2)
+    return (row, col, adjusted_width_fov)
+
 def number_players_window():
     run = True
     
@@ -195,13 +228,13 @@ def select_flashlight_window(num_players):
                 return players_flashlights
 
     pygame.quit()
-        
+
 def main_game(flashlights):
+    index_selected_flashlight = 0
     counter_rounds = 1
     run = True
     pausing = False
     light_off = True
-    use_flashlight = list()
     place_fov = False
     make_fov_visible = False
     place_fov_small = False
@@ -213,6 +246,10 @@ def main_game(flashlights):
     registered_humans = 0
     button_flashlights = list()
     use_flashlight = list()
+    num_creat = set()
+    cleared = False
+
+
     for i in range(len(flashlights)):
         use_flashlight.append(False)
 
@@ -221,17 +258,39 @@ def main_game(flashlights):
         # track user interaction
         for event in pygame.event.get():
 
-            # user closes the pygame window
-            if event.type == pygame.QUIT:
-                run = False
-                
             # draw background
             WIN.fill(GREY)   
         
             # draw grid
             draw_grid()
 
-            draw_light_button(light_off)
+            # # place Fov of flashlight
+            # to_draw = draw_object_on_grid(make_fov_visible)
+            # to_draw_small = draw_object_on_grid(make_fov_visible_small)
+
+            # if len(to_draw) == 2:
+            #     loc_fov = [to_draw[0], to_draw[1]]
+            
+            # if len(to_draw_small) == 2:
+            #     loc_fov_small = [to_draw_small[0], to_draw_small[1]]
+
+            # if len(loc_fov) != 0:
+            #     row, col, adjusted_width_fov = adjust_object_on_grid(loc_fov[0], loc_fov[1], True, WHITE) # for large flashlight
+            #     if not(cleared):
+            #         num_creat.add((row, col, adjusted_width_fov))
+            #     print(len(num_creat))
+
+            #     # count how many creatures in large FOV
+            #     num_creatures_in_fov = 0
+            #     for r in range(FOV_HEIGHT):
+            #         for c in range(adjusted_width_fov):
+            #             fov_index = (row+r) * CELL_NUMBER + (col+c)
+            #             for zombie in allZombies:
+            #                 if zombie.get_index(CELL_NUMBER) == fov_index:
+            #                     num_creatures_in_fov = num_creatures_in_fov + 1
+            #             for human in allHumans:
+            #                 if human.get_index(CELL_NUMBER) == fov_index:
+            #                     num_creatures_in_fov = num_creatures_in_fov + 1
 
             # draw flashlight
             for player in range(len(flashlights)):
@@ -239,29 +298,154 @@ def main_game(flashlights):
                     y_coord = 150
                 else:
                     y_coord = 280
-                if flashlights[player-1] == 'Large':
+                if flashlights[player] == 'Large':
                     button = flashlight.get_rect()
                     button_flashlights.append(button)
-                    button.x = 500 + (player%2) * 150
-                    button.y = y_coord
-                    WIN.blit(flashlight, button)
-                elif flashlights[player-1] == 'Small':
+                    if not(use_flashlight[player]):
+                        button.x = 500 + (player%2) * 150
+                        button.y = y_coord
+                        WIN.blit(flashlight, button)
+                elif flashlights[player] == 'Small':
                     button = flashlight_small.get_rect()
                     button_flashlights.append(button)
-                    button.x = 500 + (player%2) * 150
-                    button.y = y_coord
-                    WIN.blit(flashlight_small, button)
-                    
-                # if player < len(players_flashlights):
-                #     selection = font25.render('Player ' + str(player+1) + ': ' + players_flashlights[player-1], True, WHITE)
-                # else:
-                #     selection = font25.render('Player ' + str(player+1) + ': ', True, WHITE)
-                # WIN.blit(selection, (550, 200 + player*50))
+                    if not(use_flashlight[player]):
+                        button.x = 500 + (player%2) * 150
+                        button.y = y_coord
+                        WIN.blit(flashlight_small, button)
 
+            # user closes the pygame window
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.mouse.set_cursor(default_cursor)
+                if event.button == 1:   # left mouse click
+                    
+                    if place_fov:
+                        cleared = False
+                        make_fov_visible = True
+                        place_fov = False
+                        break
+
+                    if place_fov_small:
+                        make_fov_visible_small = True
+                        #place_fov_small = False
+                        break
+
+                    if light_off:
+                        if button_light_on_off.collidepoint(event.pos):
+                            light_off = False
+                            place_fov = False
+                            place_fov_small = False
+
+                        # check if one of the flashlight is used
+                        for i in range(len(flashlights)):
+                            if button_flashlights[i].collidepoint(event.pos):
+                                
+                                use_flashlight[i] = True   # flashlight currently in use
+                                index_selected_flashlight = i
+                                pygame.mouse.set_cursor(targeting_cursor)
+                                place_fov = True
+                                break
+                    else:
+                        place_fov = False
+                        place_fov_small = False
+                        if button_light_on_off.collidepoint(event.pos):
+                            light_off = True
+                            use_flashlight[index_selected_flashlight] = False  # flashlight can only be used when light is off
+                            loc_fov = []
+                            loc_fov_small = []
+                            counter_rounds = counter_rounds + 1
+                            if counter_rounds < MAX_NUM_ROUNDS:
+                                # Creatures are moving
+                                # store positional indicies of zombies in a set
+                                zombies_indicies = set([])
+
+                                # move creatures
+                                for zombie in allZombies:
+                                    zombie.move(CELL_NUMBER, 'Zombie')
+                                    zombies_indicies.add(zombie.index)
+
+                                humans_2_zombies = set()
+                                for human in allHumans:
+                                    human.move(CELL_NUMBER, 'Human', zombies_indicies)
+                                    if human.type == 'Zombie':
+                                        allZombies.add(human)
+                                        humans_2_zombies.add(human)
+
+                                allHumans.difference_update(humans_2_zombies)
+
+                elif event.button == 3 and light_off == True: # right mouse click
+                    num_creat.clear()
+                    cleared = True
+                    use_flashlight = list()
+                    for i in range(len(flashlights)):
+                        use_flashlight.append(False)
+
+            draw_light_button(light_off)
+
+            # place Fov of flashlight
+            to_draw = draw_object_on_grid(make_fov_visible)
+            to_draw_small = draw_object_on_grid(make_fov_visible_small)
+
+            if len(to_draw) == 2:
+                loc_fov = [to_draw[0], to_draw[1]]
+            
+            if len(to_draw_small) == 2:
+                loc_fov_small = [to_draw_small[0], to_draw_small[1]]
+
+            if len(loc_fov) != 0:
+                row, col, adjusted_width_fov = adjust_object_on_grid(loc_fov[0], loc_fov[1], True, WHITE) # for large flashlight
+                if not(cleared):
+                    num_creat.add((row, col, adjusted_width_fov))
+                print(len(num_creat))
+
+                # count how many creatures in large FOV
+                num_creatures_in_fov = 0
+                for r in range(FOV_HEIGHT):
+                    for c in range(adjusted_width_fov):
+                        fov_index = (row+r) * CELL_NUMBER + (col+c)
+                        for zombie in allZombies:
+                            if zombie.get_index(CELL_NUMBER) == fov_index:
+                                num_creatures_in_fov = num_creatures_in_fov + 1
+                        for human in allHumans:
+                            if human.get_index(CELL_NUMBER) == fov_index:
+                                num_creatures_in_fov = num_creatures_in_fov + 1
+                #num = num_creatures_in_fov
+            make_fov_visible = False 
+            make_fov_visible_small = False
+
+            # draw zombies
+            for zombie in allZombies:
+                draw_zombies(zombie, True)
+
+            for human in allHumans:
+                draw_humans(human, True)
+
+            
             pygame.display.flip()
             pygame.display.update()
 
     pygame.quit()
+
+# genrate set of zombies
+allZombies = set()
+maxNumZombies = 5
+numZombies = random.randrange(1, maxNumZombies)
+for i in range(numZombies):
+    row = random.randrange(0, CELL_NUMBER)
+    col = random.randrange(0, CELL_NUMBER)
+    zombie = Creature(CELL_NUMBER, row, col, 'Zombie')
+    allZombies.add(zombie)
+
+# generate set of humans
+allHumans = set()
+maxNumHumans = 5
+numHumans = random.randrange(1, maxNumHumans)
+for i in range(numHumans):
+    row = random.randrange(0, CELL_NUMBER)
+    col = random.randrange(0, CELL_NUMBER)
+    human = Creature(CELL_NUMBER, row, col, 'Human')
+    allHumans.add(human)
 
 # execute game
 def main():
