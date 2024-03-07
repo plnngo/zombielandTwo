@@ -8,17 +8,17 @@ from engine import Creature
 pygame.init()
 
 # global variables
-CELL_NUMBER = 10
+CELL_NUMBER = 8
 SQ_SIZE = 50
 FOV_HEIGHT = 3
 FOV_WIDTH = 3
-MAX_NUM_ROUNDS = 2
+MAX_NUM_ROUNDS = 20
 PENELTY_MISSING = 10
 PENELTY_TOO_MANY = 5
 PIXEL_OFFSET = 20
 
 WIDTH, HEIGHT = SQ_SIZE * CELL_NUMBER, SQ_SIZE * CELL_NUMBER
-WIN = pygame.display.set_mode((WIDTH + 300, HEIGHT))
+WIN = pygame.display.set_mode((WIDTH + 500, HEIGHT+200))
 pygame.display.set_caption("Zombieland")
 
 # buttons
@@ -46,6 +46,7 @@ YELLOW = (250, 250, 0)
 WHITE = (255, 255, 255)
 MONITOR_GREEN = (175, 225, 175)
 
+
 def draw_evaluation_window():
     # draw background
     WIN.fill(GREY)   
@@ -54,17 +55,19 @@ def draw_evaluation_window():
     draw_grid()
 
     # print information
-    text = font.render('Click on <Register Zombies> ', True, (255,255,255))
+    text = font.render('Click on <Register Creature> ', True, (255,255,255))
     text1 = font.render('and mark the position of ', True, (255,255,255))
-    text2 = font.render('all zombies in the grid', True, (255,255,255))
+    text2 = font.render('all creatures in the grid.', True, (255,255,255))
+    text3 = font.render('Then click on <Submit>.', True, (255,255,255))
 
     WIN.blit(text, (530, 50))
     WIN.blit(text1, (530, 75))
     WIN.blit(text2, (530, 100))
+    WIN.blit(text3, (530, 125))
 
     # draw registration button zombies
-    button_register_zombie = pygame.Rect(510, 230, 150, 80)
-    text_register_zombie = font.render('Register Zombies!', True, WHITE)
+    button_register_zombie = pygame.Rect(510, 230, 160, 80)
+    text_register_zombie = font.render('Register Zombies', True, WHITE)
     pygame.draw.rect(WIN, GREEN, button_register_zombie)
     WIN.blit(text_register_zombie, (515, 250))
 
@@ -75,8 +78,8 @@ def draw_evaluation_window():
     WIN.blit(text_submit, (700, 250))
 
     # draw registration button humans
-    button_register_human = pygame.Rect(510, 330, 150, 80)
-    text_register_human = font.render('Register Humans!', True, (0,0,0))
+    button_register_human = pygame.Rect(510, 330, 160, 80)
+    text_register_human = font.render('Register Humans', True, (0,0,0))
     pygame.draw.rect(WIN, YELLOW, button_register_human)
     WIN.blit(text_register_human, (515, 350))
 
@@ -117,7 +120,7 @@ def display_result(score_total, registered_zombies, registered_humans):
     text_result = font2.render('You scored ', True, WHITE)
     text_score = font2.render(str(score_total), True, WHITE)
     WIN.blit(text_result, (550, 170))
-    WIN.blit(text_score, (700, 170))
+    WIN.blit(text_score, (700, 175))
 
     # draw play again button
     button_play_again = pygame.Rect(550, 280, 170, 170)
@@ -307,6 +310,17 @@ def draw_grid(left = 0, top = 0):
         y = i // CELL_NUMBER * SQ_SIZE
         square = pygame.Rect(x, y, SQ_SIZE, SQ_SIZE)
         pygame.draw.rect(WIN, BLACK, square, width=3)
+    
+    # print labels
+        alpha = [chr(i) for i in range(ord('a'), ord('z')+1)]
+    row_letters = CELL_NUMBER * SQ_SIZE + 10
+    col_numbers = CELL_NUMBER * SQ_SIZE + 10
+    for i in range(CELL_NUMBER):
+        text = font.render(str(i), True, (255,255,255))
+        WIN.blit(text, (i*SQ_SIZE + (SQ_SIZE/2), row_letters))
+
+        text2 = font.render(alpha[i], True, (255,255,255))
+        WIN.blit(text2, (col_numbers, i*SQ_SIZE + 10))
     return
 
 # draw zombies onto position grids
@@ -397,8 +411,9 @@ def adjust_object_on_grid(x_to_Adjust, y_to_Adjust, isLargeFov, colour):
         return (row, col, fov_size) # for small FOV use size of one
     
     adjusted_width_fov = CELL_NUMBER-col
-    if adjusted_width_fov<FOV_WIDTH:
-        rectangle = pygame.Rect(x, y, adjusted_width_fov*SQ_SIZE, FOV_HEIGHT*SQ_SIZE)
+    adjusted_height_fov = CELL_NUMBER-row
+    if adjusted_width_fov<FOV_WIDTH or adjusted_height_fov<FOV_WIDTH:
+        rectangle = pygame.Rect(x, y, adjusted_width_fov*SQ_SIZE, adjusted_height_fov*SQ_SIZE)
         pygame.draw.rect(WIN, colour, rectangle, width=2)
     else:
         adjusted_width_fov = FOV_WIDTH
