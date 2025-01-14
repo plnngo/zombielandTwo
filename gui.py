@@ -354,28 +354,33 @@ def draw_flashlight_small(useFlashlight):
         button_flashlight_small.y = 230
         WIN.blit(flashlight_small, button_flashlight_small)
 
-def draw_monitor(numCreatures, numZombies, numHumans, light_off):
-    text = font.render('Number of Detections', True, (255,255,255))
-    text_descrip_zombies = font.render('Zombies: ', True, (255,255,255))
-    text_descrip_humans = font.render('Humans: ', True, (255,255,255))
+def draw_monitor(numCreatures, numZombies, regZombie, numHumans, light_off, use_flashlight_small):
+    text = font.render('Direction Zombie', True, (255,255,255))
+    #text_descrip_zombies = font.render('Zombies: ', True, (255,255,255))
+    #text_descrip_humans = font.render('Humans: ', True, (255,255,255))
 
     text_numDetections = font2.render(str(numCreatures), True, (255,255,255))
-    text_numZombies = font.render(str(numZombies), True, (255,255,255))
-    text_numHumans = font.render(str(numHumans), True, (255,255,255))
+    #text_numZombies = font.render(str(numZombies), True, (255,255,255))
+    #text_numHumans = font.render(str(numHumans), True, (255,255,255))
 
     monitor_frame = pygame.Rect(540, 40, 220, 170)
     monitor = pygame.Rect(550, 50, 200, 150)
     pygame.draw.rect(WIN, BLACK, monitor_frame)
     pygame.draw.rect(WIN, MONITOR_GREEN, monitor)
     WIN.blit(text, (560, 50))
-    WIN.blit(text_descrip_zombies, (560, 130))
-    WIN.blit(text_descrip_humans, (660, 130))
+    #WIN.blit(text_descrip_zombies, (560, 130))
+    #WIN.blit(text_descrip_humans, (660, 130))
 
+    #Extract direction that zombie follows
+    dir = 0
+    if numZombies>0 and use_flashlight_small:
+        dir = regZombie.get_direction_zombie()
+    text_numDetections = font.render(str(dir), True, (255,255,255))
 
     if not(light_off):
         WIN.blit(text_numDetections, (640, 80))
-        WIN.blit(text_numZombies, (585, 160))
-        WIN.blit(text_numHumans, (685, 160))    
+        #WIN.blit(text_numZombies, (585, 160))
+        #WIN.blit(text_numHumans, (685, 160))    
 
 def draw_object_on_grid(placeFov):
     if placeFov:
@@ -512,6 +517,7 @@ def main():
     num = 0
     registered_zombies = 0
     registered_humans = 0
+    registered_zombie = 0
 
     while run:
    
@@ -639,9 +645,12 @@ def main():
                 row, col, adjusted_width_fov = adjust_object_on_grid(loc_fov_small[0], loc_fov_small[1], False, WHITE) # for small flashlight
                 fov_index = row * CELL_NUMBER + col
                 registered_zombies = 0
+                registered_zombie = 0
                 for zombie in allZombies:
                     if zombie.get_index(CELL_NUMBER) == fov_index:
                         registered_zombies = registered_zombies + 1
+                        draw_zombies(zombie, not(light_off))
+                        registered_zombie = zombie
                 registered_humans = 0
                 for human in allHumans:
                     if human.get_index(CELL_NUMBER) == fov_index:
@@ -656,7 +665,7 @@ def main():
             for human in allHumans:
                 draw_humans(human, False)
         
-            draw_monitor(num, registered_zombies, registered_humans, light_off)
+            draw_monitor(num, registered_zombies, registered_zombie, registered_humans, light_off, use_flashlight_small)
             pygame.display.flip()
             pygame.display.update()
 
