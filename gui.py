@@ -12,7 +12,8 @@ CELL_NUMBER = 8
 SQ_SIZE = 50
 FOV_HEIGHT = 3
 FOV_WIDTH = 3
-MAX_NUM_ROUNDS = 20
+#MAX_NUM_ROUNDS = 20
+MAX_NUM_ROUNDS = 1
 PENELTY_MISSING = 10
 PENELTY_TOO_MANY = 5
 PIXEL_OFFSET = 20
@@ -90,10 +91,10 @@ def draw_evaluation_window():
     WIN.blit(text_submit, (700, 350))
 
     # draw clear button
-    button_clear = pygame.Rect(610, 430, 100, 40)
-    text_clear = font.render('Clear', True, BLACK)
+    button_clear = pygame.Rect(695, 430, 70, 40)
+    text_clear = font.render('Clear ', True, BLACK)
     pygame.draw.rect(WIN, WHITE, button_clear)
-    WIN.blit(text_clear, (630, 435))
+    WIN.blit(text_clear, (700, 435))
     return button_register_zombie, button_register_human, button_clear, button_submit_zombies, button_submit_humans
 
 def display_result(score_total, registered_zombies, registered_humans):
@@ -168,6 +169,7 @@ def evaluate():
 
             if caption[0] == "Zombieland - Endgame":
                 clear_disabled = False
+                #clear_disabled = True
             else:
                 clear_disabled = True
 
@@ -179,7 +181,7 @@ def evaluate():
                     return False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:   # left mouse click
-                        # print('clear disabled', clear_disabled)
+                        print('clear disabled', clear_disabled)
                         # print('play again disabled', play_again_disabled)
                         if button_replay.collidepoint(event.pos) or button_play_again.collidepoint(event.pos):
                             if play_again_disabled:
@@ -207,8 +209,8 @@ def evaluate():
                             if registering_zombies or submit_humans:
                                 break
                             pygame.mouse.set_cursor(targeting_cursor)
-                            print('num zombies:', len(registered_zombies))
-                            print('num humans:', len(registered_humans))
+                            #print('num zombies:', len(registered_zombies))
+                            #print('num humans:', len(registered_humans))
                             registering_zombies = False
                             registering_humans = True
                             place_creature = True
@@ -217,24 +219,25 @@ def evaluate():
                         if button_clear.collidepoint(event.pos):
                             if clear_disabled:
                                 break
-                            pygame.mouse.set_cursor(default_cursor)
-                            registered_zombies.clear()
-                            registered_humans.clear()
-                            registering_zombies = False
-                            registering_humans = False
-                            first_creature = False
-                            submit_zombies = False
-                            submit_humans = False
-                            run_evaluate = True
-                            make_creature_visible = False
-                            place_creature = False
-                            loc_creature = []
-                            draw_evaluation_window()
-                            clear_disabled = False
-                            pygame.display.flip()
-                            pygame.display.update()
-                            print('num zombies: ', len(registered_zombies))
-                            print('num humans: ', len(registered_humans))
+                            else:
+                                pygame.mouse.set_cursor(default_cursor)
+                                registered_zombies.clear()
+                                registered_humans.clear()
+                                registering_zombies = False
+                                registering_humans = False
+                                first_creature = False
+                                submit_zombies = False
+                                submit_humans = False
+                                run_evaluate = True
+                                make_creature_visible = False
+                                place_creature = False
+                                loc_creature = []
+                                draw_evaluation_window()
+                                clear_disabled = False
+                                pygame.display.flip()
+                                pygame.display.update()
+                                print('num zombies: ', len(registered_zombies))
+                                print('num humans: ', len(registered_humans))
 
                         if button_submit_zombies.collidepoint(event.pos):
                             if registering_humans:
@@ -250,8 +253,6 @@ def evaluate():
                             submit_humans = True
                             place_creature = False
                             registering_humans = False
-                            print('num zombies: ', registered_zombies)
-                            print('num humans: ', registered_humans)
 
                         if first_creature:
                             first_creature = False
@@ -270,8 +271,6 @@ def evaluate():
                                 elif registering_humans:
                                     registered_humans.add(Creature(CELL_NUMBER, row, col, 'Human'))
                                 make_creature_visible = False
-                        print('num zombies: ', len(registered_zombies))
-                        print('num humans: ', len(registered_humans))
 
                         # Compute score
                         if submit_zombies and submit_humans:
