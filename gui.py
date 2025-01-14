@@ -132,20 +132,7 @@ def display_result(score_total, registered_zombies, registered_humans):
     button_replay.y = 270
     WIN.blit(replay, button_replay)
 
-    return button_replay, button_play_again
-
-    # track user interaction
-    # while True:
-    #     for event in pygame.event.get():
-    #         # user closes the pygame window
-    #         if event.type == pygame.QUIT:
-    #             return False
-    #         if event.type == pygame.MOUSEBUTTONDOWN:
-    #             if event.button == 1:   # left mouse click
-    #                 if button_play_again.collidepoint(event.pos):
-    #                     print('Play again')
-    #                     return True
-    
+    return button_replay, button_play_again    
 
 # Initialise endgame
 def evaluate():
@@ -330,9 +317,11 @@ def draw_zombies(zombie, display_result):
     rectangle = pygame.Rect(x, y, SQ_SIZE-PIXEL_OFFSET, SQ_SIZE-PIXEL_OFFSET)
     if display_result:
         pygame.draw.rect(WIN, GREEN, rectangle)
+        #pygame.draw.rect(WIN, YELLOW, rectangle)
     else:
-        #pygame.draw.rect(WIN, GREY, rectangle)
-        pygame.draw.rect(WIN, GREEN, rectangle)
+        pygame.draw.rect(WIN, GREY, rectangle)
+        #pygame.draw.rect(WIN, GREEN, rectangle)
+    
 
 def draw_humans(human, display_result):
     x = human.col * SQ_SIZE + (PIXEL_OFFSET/2)
@@ -639,10 +628,12 @@ def main():
                         for zombie in allZombies:
                             if zombie.get_index(CELL_NUMBER) == fov_index:
                                 num_creatures_in_fov = num_creatures_in_fov + 1
+                                draw_zombies(zombie, not(light_off))
                         for human in allHumans:
                             if human.get_index(CELL_NUMBER) == fov_index:
                                 num_creatures_in_fov = num_creatures_in_fov + 1
                 num = num_creatures_in_fov
+                
             
             if len(loc_fov_small) != 0:
                 row, col, adjusted_width_fov = adjust_object_on_grid(loc_fov_small[0], loc_fov_small[1], False, WHITE) # for small flashlight
@@ -659,8 +650,8 @@ def main():
             make_fov_visible_small = False
 
             # draw zombies
-            for zombie in allZombies:
-                draw_zombies(zombie, False)
+            #for zombie in allZombies:
+                #draw_zombies(zombie, False)
 
             for human in allHumans:
                 draw_humans(human, False)
