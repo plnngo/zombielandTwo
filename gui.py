@@ -407,8 +407,14 @@ def adjust_object_on_grid(x_to_Adjust, y_to_Adjust, isLargeFov, colour):
     
     adjusted_width_fov = CELL_NUMBER-col
     adjusted_height_fov = CELL_NUMBER-row
-    if adjusted_width_fov<FOV_WIDTH or adjusted_height_fov<FOV_WIDTH:
+    if adjusted_width_fov<FOV_WIDTH and adjusted_height_fov<FOV_WIDTH:
         rectangle = pygame.Rect(x, y, adjusted_width_fov*SQ_SIZE, adjusted_height_fov*SQ_SIZE)
+        pygame.draw.rect(WIN, colour, rectangle, width=2)
+    elif adjusted_width_fov<FOV_WIDTH: 
+        rectangle = pygame.Rect(x, y, adjusted_width_fov*SQ_SIZE, FOV_HEIGHT*SQ_SIZE)
+        pygame.draw.rect(WIN, colour, rectangle, width=2)
+    elif adjusted_height_fov<FOV_WIDTH:
+        rectangle = pygame.Rect(x, y, FOV_WIDTH*SQ_SIZE, adjusted_height_fov*SQ_SIZE)
         pygame.draw.rect(WIN, colour, rectangle, width=2)
     else:
         adjusted_width_fov = FOV_WIDTH
