@@ -313,8 +313,8 @@ def draw_grid(left = 0, top = 0):
     
     # print labels
         alpha = [chr(i) for i in range(ord('a'), ord('z')+1)]
-    row_letters = CELL_NUMBER * SQ_SIZE + 10
-    col_numbers = CELL_NUMBER * SQ_SIZE + 10
+        row_letters = CELL_NUMBER * SQ_SIZE + 10
+        col_numbers = CELL_NUMBER * SQ_SIZE + 10
     for i in range(CELL_NUMBER):
         text = font.render(str(i), True, (255,255,255))
         WIN.blit(text, (i*SQ_SIZE + (SQ_SIZE/2), row_letters))
@@ -331,7 +331,8 @@ def draw_zombies(zombie, display_result):
     if display_result:
         pygame.draw.rect(WIN, GREEN, rectangle)
     else:
-        pygame.draw.rect(WIN, GREY, rectangle)
+        #pygame.draw.rect(WIN, GREY, rectangle)
+        pygame.draw.rect(WIN, GREEN, rectangle)
 
 def draw_humans(human, display_result):
     x = human.col * SQ_SIZE + (PIXEL_OFFSET/2)
@@ -340,7 +341,7 @@ def draw_humans(human, display_result):
     if display_result:
         pygame.draw.rect(WIN, YELLOW, rectangle)
     else:
-        pygame.draw.rect(WIN, GREY, rectangle)
+        pygame.draw.rect(WIN, YELLOW, rectangle)
 
 def draw_light_button(alreadyPressed):
     if alreadyPressed:

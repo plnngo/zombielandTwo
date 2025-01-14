@@ -10,23 +10,22 @@ class Fov:
 class Creature:
 
     def __init__(self, cell_number, row, col, type):
-        # self.row = random.randrange(0, cell_number)
-        # self.col = random.randrange(0, cell_number)
         self.row = row
         self.col = col
         self.index = self.get_index(cell_number)
         self.type = type
         self.directions = ['L', 'D', 'R', 'U', 'S']
+        self.zombie_dir = random.choices(self.directions, weights=(0.25, 0.25, 0.25, 0.25, 0.0), k=1)
 
     def get_index(self, cell_number):
         return self.row * cell_number + self.col
     
     def get_direction_human(self):
-        choice = random.choices(self.directions, weights=(0.3, 0.1, 0.3, 0.1, 0.6), k=1)
+        choice = random.choices(self.directions, weights=(0.0, 0.0, 0.0, 0.0, 1.0), k=1)
         return choice
     
     def get_direction_zombie(self):
-        choice = random.choices(self.directions, weights=(0.2, 0.2, 0.2, 0.2, 0.2), k=1)
+        choice = self.zombie_dir
         return choice
     
     def move(self, cell_number, type, occupiedFields = {}):
@@ -39,25 +38,29 @@ class Creature:
             return 0
         
         # compute new position
-        print(direction)
-        if 'L' in direction:
+        #print(direction)
+        if 'L' in direction and self.type=='Zombie':
             if self.col == 0:
                 self.col = self.col + 1     # creature can not exit grid but bounces off the wall
+                self.zombie_dir = ['R']
             else:
                 self.col = self.col - 1     
-        elif 'D' in direction:
+        elif 'D' in direction and self.type=='Zombie':
             if self.row == cell_number-1:
                 self.row = self.row - 1     # creature can not exit grid but bounces off the wall
+                self.zombie_dir = ['U']
             else:
                 self.row = self.row + 1
-        elif 'R' in direction:
+        elif 'R' in direction and self.type=='Zombie':
             if self.col == cell_number-1:
                 self.col = self.col -1      # creature can not exit grid but bounces off the wall
+                self.zombie_dir = ['L']
             else:
                 self.col = self.col + 1
-        elif 'U' in direction:
+        elif 'U' in direction and self.type=='Zombie':
             if self.row == 0:
                 self.row = self.row + 1     # creature can not exit grid but bounces off the wall
+                self.zombie_dir = ['D']
             else:
                 self.row = self.row - 1
         elif direction == 'S':
